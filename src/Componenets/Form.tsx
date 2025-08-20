@@ -18,7 +18,7 @@ function Form() {
     const alEnviar = handleSubmit((data)=>{
         console.log(data)
         addTask(data);
-        alert("Tarea agregada con exito");
+     
         turnViewForm();
     });
 

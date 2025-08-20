@@ -1,12 +1,18 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 // import { guardarTareas  } from "../data/taskManager";
 import type { TaskType } from "../types";
+// import dotenv from "dotenv"
+// import process from "node:process";
 
+
+
+// dotenv.config()
+//npm i -D @types/node
 interface TaskContextType {
   tasks: TaskType[]
-  addTask: (task:Omit <TaskType ,"id" | "completada" | "borrada" > )=>Promise<void>
-  checkTask:(id:number)=>Promise<void>
-  deleteTask:(id:number)=>Promise<void>
+  addTask: (task:Omit <TaskType ,"_id" | "completada" > )=>Promise<void>
+  checkTask:(_id:string)=>Promise<void>
+  deleteTask:(_id:string)=>Promise<void>
 }
 
 const TaskContext = createContext <TaskContextType | undefined> (undefined);
@@ -16,7 +22,8 @@ function TaskProvider({ children }:{children: ReactNode}) {
 
   useEffect(() => {
     async function fetchTasks() {
-      const response = await fetch ("http://localhost:3000/task")
+      // console.log(process)
+      const response = await fetch (import.meta.env.VITE_API+"/task");
       const loadedTasks = await response.json() as TaskType[];
       // const loadedTasks = await getTasks();
       setTasks(loadedTasks);
@@ -27,7 +34,7 @@ function TaskProvider({ children }:{children: ReactNode}) {
   const addTask: TaskContextType["addTask"] = async (task) => {
 
     try {
-      const response = await fetch("http://localhost:3000/task" ,{
+      const response = await fetch(import.meta.env.VITE_API + "/task" ,{
     method:"POST",
     headers:{
            "Content-Type":"application/json"
@@ -38,6 +45,7 @@ function TaskProvider({ children }:{children: ReactNode}) {
     const newTask = await response.json() as TaskType
 
     const updatedTasks = [...tasks,newTask]
+       alert("Tarea agregada con exito");
     setTasks(updatedTasks)
       
     } catch (error) {
@@ -59,10 +67,10 @@ function TaskProvider({ children }:{children: ReactNode}) {
     // await guardarTareas (updatedTasks);
   };
 
-  const checkTask: TaskContextType["checkTask"] = async (id) => {
+  const checkTask: TaskContextType["checkTask"] = async (_id) => {
 
     try {
-       const response = await fetch(`http://localhost:3000/task/${id}`,{
+       const response = await fetch(process.env.LINK_API+"task" +{_id},{
        headers:{
            "Content-Type":"application/json"
            },
@@ -70,7 +78,7 @@ function TaskProvider({ children }:{children: ReactNode}) {
     })
     const checkedTask =  await response.json() as TaskType
 
-    const updatedTask  = tasks.map(task=> task.id == checkedTask.id ? checkedTask : task )
+    const updatedTask  = tasks.map(task=> task._id == checkedTask._id ? checkedTask : task )
     setTasks(updatedTask)
     console.log(checkedTask)
       
@@ -87,16 +95,16 @@ function TaskProvider({ children }:{children: ReactNode}) {
 
   };
 
- const deleteTask: TaskContextType['deleteTask'] = async (id) => {
+ const deleteTask: TaskContextType['deleteTask'] = async (_id) => {
         
         try {
-            const response = await fetch (`http://localhost:3000/task/${id}`, {
+            const response = await fetch (import.meta.env.VITE_API + '/task/' + _id , {
                 method: 'DELETE'
             })
 
-            const tareaBorrada = await response.json() as TaskType
+            const tareaBorrada = await response.json() as Pick <TaskType, "_id">
 
-            const updatedTasks = tasks.filter(tarea => tarea.id !== tareaBorrada.id)
+            const updatedTasks = tasks.filter(tarea => tarea._id !== tareaBorrada._id)
             setTasks(updatedTasks)
 
             // if (!response.ok) {
@@ -149,3 +157,5 @@ export function useTask() {
 }
 
 export default TaskProvider;
+
+
