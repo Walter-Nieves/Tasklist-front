@@ -70,17 +70,28 @@ function TaskProvider({ children }:{children: ReactNode}) {
   const checkTask: TaskContextType["checkTask"] = async (_id) => {
 
     try {
-       const response = await fetch(process.env.LINK_API+"task" +{_id},{
+       const response = await fetch(import.meta.env.VITE_API + "/task/" + _id ,{
        headers:{
            "Content-Type":"application/json"
            },
            method:"PATCH"
     })
-    const checkedTask =  await response.json() as TaskType
+    const checkedTask =  await response.json() as Pick <TaskType, '_id' | 'completada' >
+    
+    const updatedTasks = [...tasks]
+    const searchTaskIndex = updatedTasks.findIndex(task => task._id == checkedTask._id)
 
-    const updatedTask  = tasks.map(task=> task._id == checkedTask._id ? checkedTask : task )
-    setTasks(updatedTask)
-    console.log(checkedTask)
+    if(searchTaskIndex == -1){
+      throw new Error("Error al marcar la tarea")
+    }
+
+    updatedTasks[searchTaskIndex].completada = checkedTask.completada
+
+    setTasks(updatedTasks)
+    
+    // const updatedTask  = tasks.map(task=> task._id == checkedTask._id ? checkedTask : task )
+    // setTasks(updatedTask)
+    // console.log(checkedTask)
       
     } catch (error) {
       console.error(error)
@@ -103,6 +114,7 @@ function TaskProvider({ children }:{children: ReactNode}) {
             })
 
             const tareaBorrada = await response.json() as Pick <TaskType, "_id">
+            console.log(tareaBorrada)
 
             const updatedTasks = tasks.filter(tarea => tarea._id !== tareaBorrada._id)
             setTasks(updatedTasks)
