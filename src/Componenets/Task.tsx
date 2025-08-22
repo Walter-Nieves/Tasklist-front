@@ -64,6 +64,7 @@ function Task({ tareaProp: { titulo, descripcion, completada, _id: id } }:TaskPr
   return (
     <div className="bg-white shadow-md p-4 space-x-4 items-center rounded-lg flex">
       <CheckBox completeHook={{ completada, turnComplete }} />
+    
 
       <div
         className={`${
